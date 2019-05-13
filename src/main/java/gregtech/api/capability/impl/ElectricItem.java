@@ -24,16 +24,16 @@ public class ElectricItem implements IElectricItem, ICapabilityProvider {
     protected final int tier;
 
     protected final boolean chargeable;
-    protected final boolean canProvideEnergyExternally;
+    protected final boolean dischargeable;
 
     protected List<BiConsumer<ItemStack, Long>> listeners = new ArrayList<>();
 
-    public ElectricItem(ItemStack itemStack, long maxCharge, int tier, boolean chargeable, boolean canProvideEnergyExternally) {
+    public ElectricItem(ItemStack itemStack, long maxCharge, int tier, boolean chargeable, boolean dischargeable) {
         this.itemStack = itemStack;
         this.maxCharge = maxCharge;
         this.tier = tier;
         this.chargeable = chargeable;
-        this.canProvideEnergyExternally = canProvideEnergyExternally;
+        this.dischargeable = dischargeable;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ElectricItem implements IElectricItem, ICapabilityProvider {
 
     @Override
     public boolean canProvideChargeExternally() {
-        return this.canProvideEnergyExternally;
+        return this.dischargeable;
     }
 
     @Override
@@ -87,8 +87,8 @@ public class ElectricItem implements IElectricItem, ICapabilityProvider {
         if (itemStack.getCount() != 1) {
             return 0L;
         }
-        if ((chargeable || amount == Long.MAX_VALUE) && (chargerTier >= tier)) {
-            long canReceive = getMaxCharge() - getCharge();
+        if ((chargeable || amount == Long.MAX_VALUE) && (chargerTier == Integer.MAX_VALUE || tier >= chargerTier) && getMaxCharge() > 0) {
+            long canReceive = maxCharge - getCharge();
             if (!ignoreTransferLimit) {
                 amount = Math.min(amount, GTValues.V[tier]);
             }
@@ -106,7 +106,7 @@ public class ElectricItem implements IElectricItem, ICapabilityProvider {
         if (itemStack.getCount() != 1) {
             return 0L;
         }
-        if ((canProvideEnergyExternally || !externally || amount == Long.MAX_VALUE) && (chargerTier >= tier)) {
+        if ((dischargeable || !externally || amount == Long.MAX_VALUE) && (chargerTier >= tier) && getMaxCharge() > 0) {
             if (!ignoreTransferLimit) {
                 amount = Math.min(amount, GTValues.V[tier]);
             }

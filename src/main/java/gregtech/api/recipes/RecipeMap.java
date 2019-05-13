@@ -32,7 +32,6 @@ import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.IItemHandlerModifiable;
-import stanhebben.zenscript.annotations.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenGetter;
 import stanhebben.zenscript.annotations.ZenMethod;
@@ -55,6 +54,7 @@ public class RecipeMap<R extends RecipeBuilder<R>> {
     private final int minOutputs, maxOutputs;
     private final int minFluidInputs, maxFluidInputs;
     private final int minFluidOutputs, maxFluidOutputs;
+    private final int amperage;
     private final TByteObjectMap<TextureArea> slotOverlays;
     protected TextureArea progressBarTexture;
     protected MoveType moveType;
@@ -65,8 +65,9 @@ public class RecipeMap<R extends RecipeBuilder<R>> {
     public RecipeMap(String unlocalizedName,
                      int minInputs, int maxInputs, int minOutputs, int maxOutputs,
                      int minFluidInputs, int maxFluidInputs, int minFluidOutputs, int maxFluidOutputs,
-                     R defaultRecipe) {
+                     int amperage, R defaultRecipe) {
         this.unlocalizedName = unlocalizedName;
+        this.amperage = amperage;
         this.slotOverlays = new TByteObjectHashMap<>();
         this.progressBarTexture = GuiTextures.PROGRESS_BAR_ARROW;
         this.moveType = MoveType.HORIZONTAL;
@@ -174,8 +175,8 @@ public class RecipeMap<R extends RecipeBuilder<R>> {
     }
 
     @Nullable
-    public Recipe findRecipe(long voltage, IItemHandlerModifiable inputs, IMultipleTankHandler fluidInputs, int outputFluidTankCapacity) {
-        return this.findRecipe(voltage, GTUtility.itemHandlerToList(inputs), GTUtility.fluidHandlerToList(fluidInputs), outputFluidTankCapacity);
+    public Recipe findRecipe(long voltage, IItemHandlerModifiable inputs, IMultipleTankHandler fluidInputs) {
+        return this.findRecipe(voltage, GTUtility.itemHandlerToList(inputs), GTUtility.fluidHandlerToList(fluidInputs));
     }
 
     /**
@@ -184,11 +185,10 @@ public class RecipeMap<R extends RecipeBuilder<R>> {
      * @param voltage     Voltage of the Machine or Long.MAX_VALUE if it has no Voltage
      * @param inputs      the Item Inputs
      * @param fluidInputs the Fluid Inputs
-     * @param outputFluidTankCapacity minimal capacity of output fluid tank, used for fluid canner recipes for example
      * @return the Recipe it has found or null for no matching Recipe
      */
     @Nullable
-    public Recipe findRecipe(long voltage, List<ItemStack> inputs, List<FluidStack> fluidInputs, int outputFluidTankCapacity) {
+    public Recipe findRecipe(long voltage, List<ItemStack> inputs, List<FluidStack> fluidInputs) {
         if (recipeList.isEmpty())
             return null;
         if (minFluidInputs > 0 && GTUtility.amountOfNonNullElements(fluidInputs) < minFluidInputs) {
@@ -212,7 +212,7 @@ public class RecipeMap<R extends RecipeBuilder<R>> {
             if (recipes == null) continue;
             for (Recipe tmpRecipe : recipes) {
                 if (tmpRecipe.matches(false, inputs, fluidInputs)) {
-                    return voltage >= tmpRecipe.getEUt() ? tmpRecipe : null;
+                    return voltage * amperage >= tmpRecipe.getEUt() ? tmpRecipe : null;
                 }
             }
         }
@@ -223,7 +223,7 @@ public class RecipeMap<R extends RecipeBuilder<R>> {
     private Recipe findByInputs(long voltage, List<ItemStack> inputs, List<FluidStack> fluidInputs) {
         for (Recipe recipe : recipeList) {
             if (recipe.matches(false, inputs, fluidInputs)) {
-                return voltage >= recipe.getEUt() ? recipe : null;
+                return voltage * amperage >= recipe.getEUt() ? recipe : null;
             }
         }
         return null;
@@ -335,7 +335,7 @@ public class RecipeMap<R extends RecipeBuilder<R>> {
     @ZenMethod("findRecipe")
     @Method(modid = GTValues.MODID_CT)
     @Nullable
-    public CTRecipe ctFindRecipe(long maxVoltage, IItemStack[] itemInputs, ILiquidStack[] fluidInputs, @Optional(valueLong = Integer.MAX_VALUE) int outputFluidTankCapacity) {
+    public CTRecipe ctFindRecipe(long maxVoltage, IItemStack[] itemInputs, ILiquidStack[] fluidInputs) {
         List<ItemStack> mcItemInputs = itemInputs == null ? Collections.emptyList() :
             Arrays.stream(itemInputs)
                 .map(CraftTweakerMC::getItemStack)
@@ -344,7 +344,7 @@ public class RecipeMap<R extends RecipeBuilder<R>> {
             Arrays.stream(fluidInputs)
                 .map(CraftTweakerMC::getLiquidStack)
                 .collect(Collectors.toList());
-        Recipe backingRecipe = findRecipe(maxVoltage, mcItemInputs, mcFluidInputs, outputFluidTankCapacity);
+        Recipe backingRecipe = findRecipe(maxVoltage, mcItemInputs, mcFluidInputs);
         return backingRecipe == null ? null : new CTRecipe(this, backingRecipe);
     }
 
@@ -415,6 +415,11 @@ public class RecipeMap<R extends RecipeBuilder<R>> {
     @ZenGetter("maxFluidOutputs")
     public int getMaxFluidOutputs() {
         return maxFluidOutputs;
+    }
+
+    @ZenGetter("amperage")
+    public int getAmperage() {
+        return amperage;
     }
 
     @Override

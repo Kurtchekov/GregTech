@@ -12,7 +12,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -231,32 +230,17 @@ public class MetaTileEntityHolder extends TickableTileEntityBase implements IUIH
 
     @Override
     public boolean shouldRenderInPass(int pass) {
-        if(metaTileEntity instanceof IRenderMetaTileEntity) {
-            return ((IRenderMetaTileEntity) metaTileEntity).shouldRenderInPass(pass);
-        } else if(metaTileEntity instanceof IFastRenderMetaTileEntity) {
-            return ((IFastRenderMetaTileEntity) metaTileEntity).shouldRenderInPass(pass);
-        }
-        return false;
-    }
-
-    @Override
-    public AxisAlignedBB getRenderBoundingBox() {
-        if(metaTileEntity instanceof IRenderMetaTileEntity) {
-            return ((IRenderMetaTileEntity) metaTileEntity).getRenderBoundingBox();
-        } else if(metaTileEntity instanceof IFastRenderMetaTileEntity) {
-            return ((IFastRenderMetaTileEntity) metaTileEntity).getRenderBoundingBox();
-        }
-        return new AxisAlignedBB(getPos(), getPos().add(1, 1, 1));
-    }
-
-    @Override
-    public boolean hasFastRenderer() {
-        return metaTileEntity instanceof IFastRenderMetaTileEntity &&
-            !(metaTileEntity instanceof IRenderMetaTileEntity);
+        return metaTileEntity != null && metaTileEntity.requiresDynamicRendering() &&
+            metaTileEntity.shouldRenderInPass(pass);
     }
 
     @Override
     public boolean canRenderBreaking() {
         return false;
+    }
+
+    @Override
+    public boolean hasFastRenderer() {
+        return true;
     }
 }

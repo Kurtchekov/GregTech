@@ -2,25 +2,24 @@ package gregtech.api.gui.widgets;
 
 import com.google.common.base.Preconditions;
 import gregtech.api.gui.GuiTextures;
+import gregtech.api.gui.Widget;
 import gregtech.api.gui.resources.SizedTextureArea;
 import gregtech.api.gui.resources.TextureArea;
 import gregtech.api.util.function.BooleanConsumer;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.BooleanSupplier;
 
-public class ToggleButtonWidget extends AbstractPositionedRectangleWidget {
+public class ToggleButtonWidget extends Widget {
 
+    protected int xPosition;
+    protected int yPosition;
+    protected int width, height;
     protected TextureArea buttonTexture;
     private BooleanSupplier isPressedCondition;
     private BooleanConsumer setPressedExecutor;
-    private String tooltipText;
     protected boolean isPressed;
 
     public ToggleButtonWidget(int xPosition, int yPosition, int width, int height, BooleanSupplier isPressedCondition, BooleanConsumer setPressedExecutor) {
@@ -29,7 +28,7 @@ public class ToggleButtonWidget extends AbstractPositionedRectangleWidget {
 
     public ToggleButtonWidget(int xPosition, int yPosition, int width, int height, TextureArea buttonTexture,
                               BooleanSupplier isPressedCondition, BooleanConsumer setPressedExecutor) {
-        super(xPosition, yPosition, width, height);
+        super();
         Preconditions.checkNotNull(buttonTexture, "texture");
         this.xPosition = xPosition;
         this.yPosition = yPosition;
@@ -46,12 +45,6 @@ public class ToggleButtonWidget extends AbstractPositionedRectangleWidget {
         return this;
     }
 
-    public ToggleButtonWidget setTooltipText(String tooltipText) {
-        Preconditions.checkNotNull(tooltipText, "tooltipText");
-        this.tooltipText = tooltipText;
-        return this;
-    }
-
     @Override
     @SideOnly(Side.CLIENT)
     public void drawInBackground(int mouseX, int mouseY) {
@@ -59,16 +52,6 @@ public class ToggleButtonWidget extends AbstractPositionedRectangleWidget {
             ((SizedTextureArea) buttonTexture).drawHorizontalCutSubArea(xPosition, yPosition, width, height, isPressed ? 0.5 : 0.0, 0.5);
         } else {
             buttonTexture.drawSubArea(xPosition, yPosition, width, height, 0.0, isPressed ? 0.5 : 0.0, 1.0, 0.5);
-        }
-    }
-
-    @Override
-    public void drawInForeground(int mouseX, int mouseY) {
-        if(isMouseOver(mouseX, mouseY) && tooltipText != null) {
-            String postfix = isPressed ? ".enabled" : ".disabled";
-            String tooltipHoverString = tooltipText + postfix;
-            List<String> hoverList = Arrays.asList(I18n.format(tooltipHoverString).split("/n"));
-            drawHoveringText(ItemStack.EMPTY, hoverList, 300, mouseX, mouseY);
         }
     }
 

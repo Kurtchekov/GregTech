@@ -6,17 +6,16 @@ import gregtech.api.gui.GuiTextures;
 import gregtech.api.gui.ModularUI;
 import gregtech.api.gui.ModularUI.Builder;
 import gregtech.api.gui.widgets.*;
-import gregtech.api.metatileentity.SimpleMachineMetaTileEntity.RecipeMapWithConfigButton;
 import gregtech.api.recipes.RecipeMap;
 import gregtech.api.recipes.builders.SimpleRecipeBuilder;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
 import java.util.function.DoubleSupplier;
 
-public class RecipeMapGroupOutput extends RecipeMap<SimpleRecipeBuilder> implements RecipeMapWithConfigButton {
+public class RecipeMapGroupOutput extends RecipeMap<SimpleRecipeBuilder> {
 
     public RecipeMapGroupOutput(String unlocalizedName, int minInputs, int maxInputs, int minOutputs, int maxOutputs, int minFluidInputs, int maxFluidInputs, int minFluidOutputs, int maxFluidOutputs, int amperage, SimpleRecipeBuilder defaultRecipe) {
-        super(unlocalizedName, minInputs, maxInputs, minOutputs, maxOutputs, minFluidInputs, maxFluidInputs, minFluidOutputs, maxFluidOutputs, defaultRecipe);
+        super(unlocalizedName, minInputs, maxInputs, minOutputs, maxOutputs, minFluidInputs, maxFluidInputs, minFluidOutputs, maxFluidOutputs, amperage, defaultRecipe);
     }
 
     @Override
@@ -34,20 +33,9 @@ public class RecipeMapGroupOutput extends RecipeMap<SimpleRecipeBuilder> impleme
         ServerWidgetGroup fluidOutputGroup = createFluidOutputWidgetGroup(exportFluids, new ServerWidgetGroup(booleanWrapper::getCurrentMode));
         builder.widget(itemOutputGroup).widget(fluidOutputGroup);
         ToggleButtonWidget buttonWidget = new ToggleButtonWidget(176 - 7 - 20, 60, 20, 20,
-            GuiTextures.BUTTON_SWITCH_VIEW, booleanWrapper::getCurrentMode, booleanWrapper::setCurrentMode)
-            .setTooltipText("gregtech.gui.toggle_view");
+            GuiTextures.BUTTON_SWITCH_VIEW, booleanWrapper::getCurrentMode, booleanWrapper::setCurrentMode);
         builder.widget(buttonWidget);
         return builder;
-    }
-
-    @Override
-    public int getLeftButtonOffset() {
-        return 0;
-    }
-
-    @Override
-    public int getRightButtonOffset() {
-        return 20;
     }
 
     private static class BooleanWrapper {

@@ -40,6 +40,10 @@ public class ArcFurnaceRecipeBuilder extends RecipeBuilder<ArcFurnaceRecipeBuild
                     .EUt(this.EUt / 3)
                     .fluidInputs(material.getPlasma(plasmaAmount))
                     .fluidOutputs(material.getFluid(plasmaAmount));
+                this.getChancedOutputs().forEachEntry((key, val) -> {
+                    builder.chancedOutput(key, val);
+                    return true;
+                });
                 builder.buildAndRegister();
             }
         }
@@ -49,7 +53,7 @@ public class ArcFurnaceRecipeBuilder extends RecipeBuilder<ArcFurnaceRecipeBuild
     public ValidationResult<Recipe> build() {
         return ValidationResult.newResult(finalizeAndValidate(),
             new Recipe(inputs, outputs, chancedOutputs, fluidInputs, fluidOutputs,
-                ImmutableMap.of(), duration, EUt, hidden, needsEmptyOutput));
+                ImmutableMap.of(), duration, EUt, hidden, canBeBuffered, needsEmptyOutput));
     }
 
 }

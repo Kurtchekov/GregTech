@@ -45,6 +45,18 @@ public class CTRecipeBuilder {
     }
 
     @ZenMethod
+    public CTRecipeBuilder cannotBeBuffered() {
+        this.backingBuilder.cannotBeBuffered();
+        return this;
+    }
+
+    @ZenMethod
+    public CTRecipeBuilder notOptimized() {
+        this.backingBuilder.notOptimized();
+        return this;
+    }
+
+    @ZenMethod
     public CTRecipeBuilder needsEmptyOutput() {
         this.backingBuilder.needsEmptyOutput();
         return this;
@@ -82,8 +94,8 @@ public class CTRecipeBuilder {
     }
 
     @ZenMethod
-    public CTRecipeBuilder chancedOutput(IItemStack outputStack, int chanceValue, int tierChanceBoost) {
-        this.backingBuilder.chancedOutput(CraftTweakerMC.getItemStack(outputStack), chanceValue, tierChanceBoost);
+    public CTRecipeBuilder chancedOutput(IIngredient ingredient, int chanceValue) {
+        this.backingBuilder.chancedOutput(CraftTweakerMC.getItemStack(ingredient.getItems().get(0)), chanceValue);
         return this;
     }
 

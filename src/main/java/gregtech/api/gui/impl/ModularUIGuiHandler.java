@@ -24,14 +24,9 @@ public class ModularUIGuiHandler implements IAdvancedGuiHandler<ModularUIGui>, I
     @Override
     public Object getIngredientUnderMouse(ModularUIGui gui, int mouseX, int mouseY) {
         Collection<Widget> widgets = gui.getModularUI().guiWidgets.values();
-        mouseX -= gui.getGuiLeft();
-        mouseY -= gui.getGuiTop();
         for (Widget widget : widgets) {
             if (widget instanceof IIngredientSlot) {
-                Object result = ((IIngredientSlot) widget).getIngredientOverMouse(mouseX, mouseY);
-                if(result != null) {
-                    return result;
-                }
+                return ((IIngredientSlot) widget).getIngredientOverMouse(mouseX, mouseY);
             }
         }
         return null;
